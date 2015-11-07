@@ -21,20 +21,20 @@ $config = [
             'identityClass' => 'app\models\User',
             'enableAutoLogin' => true,
         ],
-        'errorHandler' => [
-            'errorAction' => 'site/error',
-        ],
-        'urlManager' => [
+        'urlManager'=>array(
             'class' => 'yii\web\UrlManager',
-            // Disable index.php
-            'showScriptName' => false,
-            // Disable r= routes
             'enablePrettyUrl' => true,
+            'baseUrl' => '/yii2/basic/web/index.php',
+            'showScriptName' => false,
+            'enableStrictParsing' => false,
             'rules' => array(
                 '<controller:\w+>/<id:\d+>' => '<controller>/view',
                 '<controller:\w+>/<action:\w+>/<id:\d+>' => '<controller>/<action>',
                 '<controller:\w+>/<action:\w+>' => '<controller>/<action>',
             ),
+        ),
+        'errorHandler' => [
+            'errorAction' => 'site/error',
         ],
         'mailer' => [
             'class' => 'yii\swiftmailer\Mailer',
