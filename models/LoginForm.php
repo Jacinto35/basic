@@ -2,64 +2,43 @@
 
 namespace app\models;
 
-use Yii;
-use yii\base\Model;
-use app\models\User;
-
-/**
- * LoginForm is the model behind the login form.
- */
 class LoginForm
 {
-    public $email;
-    public $password;
-    public $rememberMe = true;
-    private $_user = false;
     private $user = false;
+    private $model;
+    private $rules = [
+        [['email', 'password'], 'required'],
+        ['rememberMe', 'boolean'],
+        ['password', 'validatePassword'],
+    ];
 
-    public function __construct(User $user){
-        $this->user = $user;
-
+    public function __construct(User $model, $post){
+        $model->addAddValidationRules($this->rules);
+        $this->model = $this->loadPostToModel($model, $post);
     }
 
-    public function rules()
-    {
-        $formRules = [
-            [['email', 'password'], 'required'],
-            ['rememberMe', 'boolean'],
-            ['password', 'validatePassword'],
-        ];
-
-
-
-    }
-
-
-    public function validatePassword($attribute)
-    {
-        if (!$this->hasErrors()) {
-            $user = $this->getUser();
-
-            if (!$user || !$user->validatePassword($this->password)) {
-                $this->addError($attribute, 'Incorrect login or password.');
-            }
+    private function loadPostToModel($model, $post){
+        if($model->load($post)){
+            return $model;
         }
     }
 
-    public function login()
-    {
-        if ($this->user->validate()) {
-            return Yii::$app->user->login($this->getUser(), $this->user->rememberMe ? 3600*24*30 : 0);
+    public function getModel(){
+        return $this->model;
+    }
+
+
+    public function login($applicationUser){
+        if ($this->model->validate()) {
+            return $applicationUser->login($this->getUser(), $this->model->rememberMe ? 3600*24*30 : 0);
         }
         return false;
     }
 
-    public function getUser()
-    {
-        if ($this->_user === false) {
-            $this->_user = User::findByLogin($this->user->email);
+    private function getUser(){
+        if ($this->user === false) {
+            $this->user = User::findByLogin($this->model->email);
         }
-
-        return $this->_user;
+        return $this->user;
     }
 }
