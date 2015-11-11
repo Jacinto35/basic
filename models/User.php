@@ -36,6 +36,7 @@ namespace app\models;
  */
 class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 {
+    private $encryption;
     public $authKey;
     public $accessToken;
     public $rememberMe;
@@ -48,6 +49,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         [['firstname', 'lastname', 'email', 'url'], 'string', 'max' => 128],
         [['lang_code'], 'string', 'max' => 2],
         [['responsible_email'], 'string', 'max' => 80],
+        ['password', 'validatePassword'],
     ];
 
     public static function tableName()
@@ -137,7 +139,7 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         if (!$this->hasErrors()) {
             $user = $this->getUser();
-            if (!$user || !$user->validateUserPassword($this->password)) {
+            if (!$user || !$user->validateUserPassword($this->password, $this->encryption)) {
                 $this->addError($attribute, 'Incorrect login or password.');
             }
         }
@@ -147,9 +149,16 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
         return self::findByLogin($this->email);
     }
 
-    public function validateUserPassword($password)
+    public function validateUserPassword($password, $encryption)
     {
-        return $this->password === md5($password);
+        if($encryption && in_array($encryption, array('md5','sha1'))){
+            return $this->password === $encryption($password);
+        }
+        return $this->password === $password;
+    }
+
+    public function setEncryptionMethod($encryption){
+        $this->encryption = $encryption;
     }
 
     public function addAddValidationRules($rules)

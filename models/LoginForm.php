@@ -9,10 +9,10 @@ class LoginForm
     private $rules = [
         [['email', 'password'], 'required'],
         ['rememberMe', 'boolean'],
-        ['password', 'validatePassword'],
     ];
 
     public function __construct(User $model, $post){
+        $model->setEncryptionMethod('md5');
         $model->addAddValidationRules($this->rules);
         $this->model = $this->loadPostToModel($model, $post);
     }
@@ -26,7 +26,6 @@ class LoginForm
     public function getModel(){
         return $this->model;
     }
-
 
     public function login($applicationUser){
         if ($this->model->validate()) {
