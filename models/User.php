@@ -103,12 +103,11 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
 
     public static function findIdentityByAccessToken($token, $type = null)
     {
-        foreach (self::$users as $user) {
+        foreach (self::$users as $user) {//@TODO
             if ($user['accessToken'] === $token) {
                 return new static($user);
             }
         }
-
         return null;
     }
 
@@ -137,11 +136,15 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     public function validatePassword($attribute)
     {
         if (!$this->hasErrors()) {
-            $user = self::findByLogin($this->email);
+            $user = $this->getUser();
             if (!$user || !$user->validateUserPassword($this->password)) {
                 $this->addError($attribute, 'Incorrect login or password.');
             }
         }
+    }
+
+    public function getUser(){
+        return self::findByLogin($this->email);
     }
 
     public function validateUserPassword($password)
@@ -153,4 +156,6 @@ class User extends \yii\db\ActiveRecord implements \yii\web\IdentityInterface
     {
         $this->rules = array_merge($this->rules, $rules);
     }
+
+
 }

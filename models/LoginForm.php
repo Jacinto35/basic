@@ -37,7 +37,7 @@ class LoginForm
 
     private function getUser(){
         if ($this->user === false) {
-            $this->user = User::findByLogin($this->model->email);
+            $this->user = $this->model->getUser();
         }
         return $this->user;
     }
